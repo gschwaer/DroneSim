@@ -4,15 +4,16 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#define EARTH_ACCELERATION  -9.81f // [m/s^2]
-#define DRONE_MAX_ACCELERATION  13.0f // [m/s^2]
+#define EARTH_ACCELERATION      -9.81f // [m/s^2]
+#define DRONE_MAX_ACCELERATION  13.0f  // [m/s^2]
+#define DRONE_MAX_LANDING_SPEED -0.5f  // [m/s]
 
 static FILE *log_file = NULL;
 static float user_data_to_log;
 static struct vehicle {
     float height;   // [m]
     float speed;    // [m/s]
-    float throttle; // [m/s^2]
+    float throttle; // (0-1)
     bool crashed;
 } drone;
 
@@ -26,16 +27,19 @@ float sim_advance_time(void)
 
     if(drone.crashed == false) {
         float previous_height = drone.height;
-        float acceleration = drone.throttle * DRONE_MAX_ACCELERATION + EARTH_ACCELERATION;
+        float acceleration = drone.throttle * DRONE_MAX_ACCELERATION +
+                             EARTH_ACCELERATION;
         drone.speed += acceleration * TIME_STEP;
         drone.height += drone.speed * TIME_STEP;
 
         if (drone.height <= 0.0f) {
-            if(drone.speed < (EARTH_ACCELERATION * TIME_STEP * 2)) {
-                printf("Drone crashed with speed %f!\n", -drone.speed);
-                drone.crashed = true;
-            } else if(previous_height > 0.0f) {
-                printf("Drone landed!\n");
+            if(previous_height > 0.0f) {
+                if(drone.speed < DRONE_MAX_LANDING_SPEED) {
+                    printf("Drone crashed with speed %f!\n", -drone.speed);
+                    drone.crashed = true;
+                } else {
+                    printf("Drone landed!\n");
+                }
             }
             drone.speed = 0.0f;
             drone.height = 0.0f;

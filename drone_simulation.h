@@ -35,6 +35,7 @@ void sim_set_user_data(float user_data);
 if((t) > (t1) && (t) < (t2)){                          \
     return move_linear((t),(t1),(t2),(z1),(z2)); }
 
+/// Returns the target height for a given point in time.
 static inline float sim_get_example_trajectory(float time)
 {
     move_linear_in_interval(time,  0.0f,  5.0f, 0.0f, 5.0f);

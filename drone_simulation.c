@@ -27,8 +27,12 @@ float sim_advance_time(void)
         float previous_height = drone.height;
         float acceleration = drone.acceleration +
                              EARTH_ACCELERATION;
-        drone.speed += acceleration * TIME_STEP;
+        // height difference due to prior velocity
         drone.height += drone.speed * TIME_STEP;
+        // height difference due to changing acceleration
+        drone.height += 0.5f * acceleration * TIME_STEP * TIME_STEP;
+        // change in speed due to change in acceleration
+        drone.speed += acceleration * TIME_STEP;
 
         if (drone.height <= 0.0f) {
             if(previous_height > 0.0f) {

@@ -1,10 +1,12 @@
 #ifndef DRONE_SIMULATION_H
 #define DRONE_SIMULATION_H
 
-#define TIME_STEP  0.01f // [s]
+#define TIME_STEP                0.01f // [s]
+#define DRONE_MAX_ACCELERATION  13.0f  // [m/s^2]
+#define EARTH_ACCELERATION      -9.81f // [m/s^2]
 
 /// Start the simulation and create a log file which contains flight data.
-/// File contains: time, height, speed, throttle, user_data
+/// File contains: time, height, speed, acceleration, user_data
 /// Matlab example for plotting the height over time:
 ///   flight_data = csvread("flight.log",1);
 ///   plot(flight_data(:,1), flight_data(:,2)); % plot height
@@ -20,8 +22,12 @@ float sim_advance_time(void);
 /// Returns the vehicle's height over ground in meters.
 float sim_get_height(void);
 
-/// Set the throttle of the vehicles propellers (must be in range 0 to 1).
-void sim_set_throttle(float throttle);
+#define MAX_ACCELERATION ((DRONE_MAX_ACCELERATION + EARTH_ACCELERATION) / -EARTH_ACCELERATION)
+#define MIN_ACCELERATION (-1.0f)
+/// Set the vertical acceleration of the vehicles (must be in range
+/// MIN_ACCELERATION to MAX_ACCELERATION, a value of 0 results in a constant
+/// drone velocity).
+void sim_set_acceleration(float acceleration);
 
 /// Set optional user data which will be logged in the flight data file.
 /// Note: User data can be used for logging the target height.

@@ -4,16 +4,14 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#define EARTH_ACCELERATION      -9.81f // [m/s^2]
-#define DRONE_MAX_ACCELERATION  13.0f  // [m/s^2]
 #define DRONE_MAX_LANDING_SPEED -0.5f  // [m/s]
 
 static FILE *log_file = NULL;
 static float user_data_to_log;
 static struct vehicle {
-    float height;   // [m]
-    float speed;    // [m/s]
-    float throttle; // (0-1)
+    float height;       // [m]
+    float speed;        // [m/s]
+    float acceleration; // [m/s^2]
     bool crashed;
 } drone;
 
@@ -23,11 +21,11 @@ float sim_advance_time(void)
 
     assert(log_file != NULL); // called before sim_start
     fprintf(log_file, "%f, %f, %f, %f, %f\n",
-            time, drone.height, drone.speed, drone.throttle, user_data_to_log);
+            time, drone.height, drone.speed, drone.acceleration, user_data_to_log);
 
     if(drone.crashed == false) {
         float previous_height = drone.height;
-        float acceleration = drone.throttle * DRONE_MAX_ACCELERATION +
+        float acceleration = drone.acceleration +
                              EARTH_ACCELERATION;
         drone.speed += acceleration * TIME_STEP;
         drone.height += drone.speed * TIME_STEP;
@@ -55,11 +53,11 @@ float sim_get_height(void)
     return drone.height;
 }
 
-void sim_set_throttle(float throttle)
+void sim_set_acceleration(float acceleration)
 {
-    assert(throttle >= 0.0f); // hardware limit: cannot accelerate downwards
-    assert(throttle <= 1.0f); // hardware limit: max motor torque
-    drone.throttle = throttle;
+    assert(acceleration >= MIN_ACCELERATION);
+    assert(acceleration <= MAX_ACCELERATION);
+    drone.acceleration = acceleration * -EARTH_ACCELERATION - EARTH_ACCELERATION;
 }
 
 void sim_set_user_data(float user_data)
@@ -73,7 +71,7 @@ void sim_start(const char *filename)
     assert(filename[0] != '\0'); // empty path given
     log_file = fopen(filename, "w");
     assert(log_file != NULL); // file creation failed
-    fprintf(log_file, "time, height, speed, throttle, user_data\n");
+    fprintf(log_file, "time, height, speed, acceleration, user_data\n");
     sim_advance_time();
 }
 

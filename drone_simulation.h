@@ -42,7 +42,8 @@ if((t) >= (t1) && (t) < (t2)){                      \
     return move_linear((t),(t1),(t2),(z1),(z2)); }
 
 /// Returns the target height for a given point in time.
-static inline float sim_get_example_trajectory(float time)
+/// Use the function without the leading underscore.
+static inline double _sim_get_example_trajectory(float time)
 {
     move_linear_in_interval(time,  0.0f,  0.5f, 0.0f, 0.0f);
     move_linear_in_interval(time,  0.5f,  6.0f, 0.0f, 5.0f);
@@ -51,5 +52,7 @@ static inline float sim_get_example_trajectory(float time)
     move_linear_in_interval(time, 24.5f, 29.0f, 0.5f, 0.0f);
     return 0.0f;
 }
+// This is an ugly workaround to silence a buggy warning in the SimpleC compiler.
+#define sim_get_example_trajectory(t) ((float)_sim_get_example_trajectory(t))
 
 #endif //DRONE_SIMULATION_H

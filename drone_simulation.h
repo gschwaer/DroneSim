@@ -22,7 +22,7 @@ float sim_advance_time(void);
 /// Returns the vehicle's height over ground in meters.
 float sim_get_height(void);
 
-#define MAX_ACCELERATION ((DRONE_MAX_ACCELERATION + EARTH_ACCELERATION) / -EARTH_ACCELERATION)
+#define MAX_ACCELERATION ((DRONE_MAX_ACCELERATION + EARTH_ACCELERATION) / (-1 * EARTH_ACCELERATION))
 #define MIN_ACCELERATION (-1.0f)
 /// Set the vertical acceleration of the vehicles (must be in range
 /// MIN_ACCELERATION to MAX_ACCELERATION, a value of 0 results in a constant
@@ -38,14 +38,15 @@ void sim_set_user_data(float user_data);
 
 #define move_linear(t,t1,t2,z1,z2) ((z1) + ((t)-(t1))*((z2)-(z1))/((t2)-(t1)))
 #define move_linear_in_interval(t,t1,t2,z1,z2)      \
-if((t) > (t1) && (t) < (t2)){                          \
+if((t) >= (t1) && (t) < (t2)){                      \
     return move_linear((t),(t1),(t2),(z1),(z2)); }
 
 /// Returns the target height for a given point in time.
 static inline float sim_get_example_trajectory(float time)
 {
-    move_linear_in_interval(time,  0.0f,  5.0f, 0.0f, 5.0f);
-    move_linear_in_interval(time,  5.0f, 15.0f, 5.0f, 5.0f);
+    move_linear_in_interval(time,  0.0f,  0.5f, 0.0f, 0.0f);
+    move_linear_in_interval(time,  0.5f,  6.0f, 0.0f, 5.0f);
+    move_linear_in_interval(time,  6.0f, 15.0f, 5.0f, 5.0f);
     move_linear_in_interval(time, 15.0f, 24.5f, 5.0f, 0.5f);
     move_linear_in_interval(time, 24.5f, 29.0f, 0.5f, 0.0f);
     return 0.0f;
